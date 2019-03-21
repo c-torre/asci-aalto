@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 
-import random
 import numpy as np
+
 
 np.random.seed(0)
 
 
 def main():
-    pass
+    learn()
 
 
 class Teacher:
@@ -18,7 +18,7 @@ class Teacher:
         self.sheet = {1: 1, 2: 2, 3: 3, 4: 4, 5: 1, 6: 2, 7: 3, 8: 4}
 
     def ask(self):
-        question = random.randint(1, 8)
+        question = np.random.randint(low=1, high=9)
         return question
 
     def answer_check(self, question, answer):
@@ -36,32 +36,33 @@ class Student:
 
     def think(self, question):
         if self.memory[question] == "a":
-            answer = random.randint(1, 4)
+            answer = np.random.randint(low=1, high=5)
         else:
             answer = self.memory[question]
         return answer
 
-    def learn(self):
-        epoch = 0
 
-        print("training begins...")
+def learn():
+    epoch = 0
 
-        while "a" in self.memory.values():
-            question = teacher.ask()
-            answer = self.think(question)
-            teacher.answer_check(question, answer)
+    print("training begins...")
 
-            epoch += 1
-            # print(memory) # Debugging
-            print("epochs:", epoch)
+    while "a" in student.memory.values():
 
-        print("finished training")
-        print(self.memory)
+        question = teacher.ask()
+        answer = student.think(question)
+        teacher.answer_check(question, answer)
+
+        epoch += 1
+        print("epochs:", epoch)
+
+    print("finished training")
+    print(student.memory)
 
 
 student = Student()
 teacher = Teacher()
-student.learn()
+
 
 if __name__ == "__main__":
     main()
