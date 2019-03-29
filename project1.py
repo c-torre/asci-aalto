@@ -66,6 +66,7 @@ def learn():
         epoch += 1
 
         # Consider using tqdm library
+        # plt graph
         print("epochs:", epoch)
 
     print("finished training")
