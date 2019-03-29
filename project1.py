@@ -7,9 +7,11 @@ import numpy as np
 
 np.random.seed(0)
 
+
 # useless stuff down there
 def main():
     learn()
+
 
 class Teacher:
 
@@ -22,6 +24,7 @@ class Teacher:
 
     def answer_check(self, student, question, answer):
         if answer == self.sheet[question]:
+            # It would be better to this by calling a method (e.g., student.learn(question, answer) )
             student.memory[question] = answer
         else:
             pass
@@ -40,6 +43,10 @@ class Student:
             answer = self.memory[question]
         return answer
 
+# Create a SmartStudent class that inherit from student but is smarter by using RL
+
+# Reduce to two options
+
 
 def learn():
     epoch = 0
@@ -49,6 +56,7 @@ def learn():
 
     print("training begins...")
 
+    # This is very beautiful... Another idea?
     while "a" in student.memory.values():
 
         question = teacher.ask()
@@ -56,6 +64,8 @@ def learn():
         teacher.answer_check(student=student, question=question, answer=answer)
 
         epoch += 1
+
+        # Consider using tqdm library
         print("epochs:", epoch)
 
     print("finished training")
