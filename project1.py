@@ -21,7 +21,7 @@ class Teacher:
         question = np.random.randint(low=1, high=9)
         return question
 
-    def answer_check(self, question, answer):
+    def answer_check(self, student, question, answer):
         if answer == self.sheet[question]:
             student.memory[question] = answer
         else:
@@ -45,23 +45,22 @@ class Student:
 def learn():
     epoch = 0
 
+    student = Student()
+    teacher = Teacher()
+
     print("training begins...")
 
     while "a" in student.memory.values():
 
         question = teacher.ask()
         answer = student.think(question)
-        teacher.answer_check(question, answer)
+        teacher.answer_check(student=student, question=question, answer=answer)
 
         epoch += 1
         print("epochs:", epoch)
 
     print("finished training")
     print(student.memory)
-
-
-student = Student()
-teacher = Teacher()
 
 
 if __name__ == "__main__":
