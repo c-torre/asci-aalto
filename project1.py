@@ -7,10 +7,9 @@ import numpy as np
 
 np.random.seed(0)
 
-
+# useless stuff down there
 def main():
     learn()
-
 
 class Teacher:
 
