@@ -18,6 +18,7 @@ class Teacher:
     def __init__(self):
         self.sheet = {1: 1, 2: 2, 3: 3, 4: 4, 5: 1, 6: 2, 7: 3, 8: 4}
 
+    # This can be a class method (i.e. @classmethod[new line]def ask(cls):[same as before]
     def ask(self):
         question = np.random.randint(low=1, high=9)
         return question
