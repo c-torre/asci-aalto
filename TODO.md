@@ -19,3 +19,8 @@ Architecture
 * [suggestion] Learn method of the student may be executed one per time step;
 put the loop outside (e.g., inside a method of the teacher)
 * Separate the graph construction
+
+
+* Create a method in the teacher that creates a question list (i.e., a task). 2 ways:
+    * n sheets one after the other (complete question set n times)
+    * random order (each question is picked up randomly)

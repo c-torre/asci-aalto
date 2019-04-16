@@ -54,17 +54,35 @@ class Teacher:
 
     def __init__(self, sheet_size=10):
 
+        """
+        sheet = {"France": 1, "US": 0, "Spain": 1}
+
+        Q1. US?
+        Q2. France?
+        Q3. US?
+        Q4. US?
+        Q5. ....
+
+        reward_vector0 = 0, 1, 0
+        reward_vector1 = 1, 0, 1
+        """
+
         # sheet = {}
         # for k, v in zip(range(10), np.tile([0, 1], reps=10 // 2)):
+
         #     sheet[k] = v
+        reply_series = np.tile([0, 2], reps=sheet_size//2)
+
         self.sheet = {k: v for k, v in zip(
             range(sheet_size),
             np.tile([0, 1], reps=sheet_size//2)
         )}
         # self.reward_vector0 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
         # self.reward_vector1 = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-        self.reward_vector0 = np.tile([1, 0], reps=sheet_size//2)
-        self.reward_vector1 = np.tile([0, 1], reps=sheet_size//2)
+
+        assert list(np.unique(reply_series)) == [0, 1], "Any value can be only either 0 or 1"
+        self.reward_vector1 = reply_series.copy()
+        self.reward_vector0 = (reply_series - 1) * (-1)
 
     @staticmethod
     def ask():
@@ -123,24 +141,27 @@ class SmartStudent(Student):
         """Decides the answer using the probability value given by the softmax
         function"""
 
-        if p0 > 0.5:
-            answer = 0
-        elif p0 < 0:
-            answer = 1
-        else:
-            answer = np.random.randint(low=0, high=2)
+        # if p0 > 0.5:
+        #     answer = 0
+        # elif p0 < 0:
+        #     answer = 1
+        # else:
+        #     answer = np.random.randint(low=0, high=2)
+
+        r = np.random.random()
+        answer = int(p0 <= r)
         self.answers.append(answer)
         return answer
 
-    def assess(self, teacher_vector, teacher_vector1, trialno):
+    def assess(self, teacher_vector, teacher_vector1, n_trial):
         """Assigns a reward value based on which answer was chosen vs. the
         correct answer"""
 
         answer = self.answers[-1]
         if answer == 0:
-            reward = teacher_vector[trialno]
+            reward = teacher_vector[n_trial]
         elif answer == 1:
-            reward = teacher_vector1[trialno]
+            reward = teacher_vector1[n_trial]
         else:
             raise Exception("Error: answer must be 0 or 1")
         return reward

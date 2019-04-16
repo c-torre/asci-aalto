@@ -11,14 +11,18 @@ def main():
 
     for t in range(t_max):
 
-        r = np.random.random()
+        results[t] = int(p > np.random.random())
+        # Do the same as:
+        # r = np.random.random()
+        # if p > r:
+        #     results[t] = 1
+        # else:
+        #     results[t] = 0
 
-        if p > r:
-            results[t] = 1
-        else:
-            results[t] = 0
+        # results[t] =
 
-    print(np.mean(results))
+    print("Theoretical probability", p)
+    print("Frequency:", np.mean(results))
 
 
 if __name__ == '__main__':
