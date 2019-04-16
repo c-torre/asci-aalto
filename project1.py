@@ -9,20 +9,24 @@ import numpy as np
 from tqdm import tqdm
 
 
-# np.random.seed(0)
-
-
 class Main:
 
-    def reinforcement_learn(self):
+    @staticmethod
+    def reinforcement_learn():
         """Reinforcement learning using the Rescorla-Wagner model"""
+        np.random.seed(0)
+
         student0 = SmartStudent()
         teacher0 = Teacher()
 
         student0.learn(teacher0.reward_vector0, teacher0.reward_vector1)
 
-    def stupid_learn(self):
+    @staticmethod
+    def stupid_learn():
         """Learning by random guessing"""
+
+        np.random.seed(0)
+
         epoch = 0
 
         student = Student()
@@ -48,14 +52,22 @@ class Main:
 
 class Teacher:
 
-    def __init__(self):
-        self.sheet = {0: 0, 1: 1, 2: 0, 3: 1, 4: 0, 5: 1, 6: 0, 7: 1, 8: 0, 9: 1}
-        self.reward_vector0 = np.array([100, 0, 100, 0, 100, 0, 100, 0, 100, 0])
-        self.reward_vector1 = np.array([0, 100, 0, 100, 0, 100, 0, 100, 0, 100])
+    def __init__(self, sheet_size=10):
 
-    # This can be a class method
-    # (i.e. @classmethod[new line]def ask(cls):[same as before]
-    def ask(self):
+        # sheet = {}
+        # for k, v in zip(range(10), np.tile([0, 1], reps=10 // 2)):
+        #     sheet[k] = v
+        self.sheet = {k: v for k, v in zip(
+            range(sheet_size),
+            np.tile([0, 1], reps=sheet_size//2)
+        )}
+        # self.reward_vector0 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+        # self.reward_vector1 = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+        self.reward_vector0 = np.tile([1, 0], reps=sheet_size//2)
+        self.reward_vector1 = np.tile([0, 1], reps=sheet_size//2)
+
+    @staticmethod
+    def ask():
         question = np.random.randint(low=0, high=10)
         return question
 
@@ -92,7 +104,7 @@ class SmartStudent(Student):
         self.answers = []
         super().__init__()
 
-    def softmax(self, v0, v1=0.4, beta=1):
+    def softmax(self, beta=1):
         """Softmax function as in https://hannekedenouden.ruhosting.nl/
         RLtutorial/html/SoftMax.html"""
 
@@ -100,12 +112,12 @@ class SmartStudent(Student):
                                            math.exp(beta * self.v1))
         return p0
 
-    def RW(self, v0, reward, alpha=1):
+    def reward(self, reward, alpha=1):
         """Rescorla-Wagner Model function as in https://hannekedenouden
         .ruhosting.nl/RLtutorial/html/RescorlaWagner.html"""
 
-        v0 = v0 + alpha * (reward - v0)
-        return v0
+        self.v0 += alpha * (reward - self.v0)
+        return self.v0
 
     def trial(self, p0):
         """Decides the answer using the probability value given by the softmax
@@ -117,35 +129,40 @@ class SmartStudent(Student):
             answer = 1
         else:
             answer = np.random.randint(low=0, high=2)
+        self.answers.append(answer)
         return answer
 
     def assess(self, teacher_vector, teacher_vector1, trialno):
         """Assigns a reward value based on which answer was chosen vs. the
         correct answer"""
 
-        if self.answer == 0:
+        answer = self.answers[-1]
+        if answer == 0:
             reward = teacher_vector[trialno]
-        elif self.answer == 1:
+        elif answer == 1:
             reward = teacher_vector1[trialno]
         else:
-            print("Error: answer must be 0 or 1")
+            raise Exception("Error: answer must be 0 or 1")
         return reward
 
     def learn(self, teacher_vector, teacher_vector1):
         """Start the learning loop using tqdm to track progress"""
 
-        with tqdm(total=100) as pbar:
-            for i in range(0, teacher_vector.size):
-                time.sleep(0.075)  # Wastes time for aesthetic reasons right now
-                p0 = self.softmax(self.v0)
-                self.answer = self.trial(p0)
-                self.answers.append(self.answer)
-                reward = self.assess(teacher_vector, teacher_vector1, i)
-                self.v0 = self.RW(self.v0, reward)
-                pbar.update(10)
-        trialno = np.arange(0, teacher_vector.size, 1)
-        plt.scatter(trialno, (teacher_vector/100), label="Correct", marker="s", alpha=0.5)
-        plt.scatter(trialno, self.answers, label="Student", marker=".")
+        # with tqdm(total=1) as pbar:
+        for i in tqdm(range(0, teacher_vector.size)):
+            time.sleep(0.075)  # Wastes time for aesthetic reasons right now
+            p0 = self.softmax()
+            # p0 = self.softmax(self.v0)
+            self.trial(p0)
+            # self.answer = self.trial(p0)
+            # self.answers.append(self.answer)
+            reward = self.assess(teacher_vector, teacher_vector1, i)
+            self.v0 = self.reward(self.v0, reward)
+            # pbar.update(10)
+        
+        n_trial = np.arange(0, teacher_vector.size, 1)
+        plt.scatter(n_trial, (teacher_vector / 1), label="Correct", marker="s", alpha=0.5)
+        plt.scatter(n_trial, self.answers, label="Student", marker=".")
         plt.xlabel("Time")
         plt.ylabel("Reply")
         plt.yticks((0, 1))
