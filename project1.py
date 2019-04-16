@@ -144,8 +144,11 @@ class SmartStudent(Student):
                 self.v0 = self.RW(self.v0, reward)
                 pbar.update(10)
         trialno = np.arange(0, teacher_vector.size, 1)
-        plt.plot(trialno, self.answers, '+',
-                 trialno, (teacher_vector/100), '-')
+        plt.scatter(trialno, self.answers)
+        plt.scatter(trialno, (teacher_vector/100))
+        plt.xlabel("Time")
+        plt.ylabel("Reply")
+        plt.yticks((0,1))
         plt.show()
 
 
