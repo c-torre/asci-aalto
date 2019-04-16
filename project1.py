@@ -90,6 +90,7 @@ class SmartStudent(Student):
         self.alpha = alpha
         self.beta = beta
         self.answers = []
+        super().__init__()
 
     def softmax(self, v0, v1=0.4, beta=1):
         """Softmax function as in https://hannekedenouden.ruhosting.nl/
