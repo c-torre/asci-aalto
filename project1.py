@@ -144,11 +144,12 @@ class SmartStudent(Student):
                 self.v0 = self.RW(self.v0, reward)
                 pbar.update(10)
         trialno = np.arange(0, teacher_vector.size, 1)
-        plt.scatter(trialno, self.answers)
-        plt.scatter(trialno, (teacher_vector/100))
+        plt.scatter(trialno, (teacher_vector/100), label="Correct", marker="s", alpha=0.5)
+        plt.scatter(trialno, self.answers, label="Student", marker=".")
         plt.xlabel("Time")
         plt.ylabel("Reply")
-        plt.yticks((0,1))
+        plt.yticks((0, 1))
+        plt.legend()
         plt.show()
 
 
