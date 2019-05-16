@@ -14,7 +14,8 @@ class Main:
     @staticmethod
     def reinforcement_learn():
         """Reinforcement learning using the Rescorla-Wagner model"""
-        np.random.seed(0)
+
+        # np.random.seed(0)
 
         student0 = SmartStudent()
         teacher0 = Teacher()
@@ -55,6 +56,13 @@ class Teacher:
     def __init__(self, sheet_size=10):
 
         """
+        "Sheet" is a data structure similar to a multiple choice exam
+        answer sheet in which a question is mapped to a correct answer.
+
+        In order to assess which answers are correct from the human-readable
+        answer sheet, reward vectors are defined as below:
+
+
         sheet = {"France": 1, "US": 0, "Spain": 1}
 
         Q1. US?
@@ -71,7 +79,9 @@ class Teacher:
         # for k, v in zip(range(10), np.tile([0, 1], reps=10 // 2)):
 
         #     sheet[k] = v
-        reply_series = np.tile([0, 2], reps=sheet_size//2)
+        #
+        #
+        reply_series = np.tile([0, 1], reps=sheet_size//2)
 
         self.sheet = {k: v for k, v in zip(
             range(sheet_size),
@@ -80,7 +90,8 @@ class Teacher:
         # self.reward_vector0 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
         # self.reward_vector1 = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
 
-        assert list(np.unique(reply_series)) == [0, 1], "Any value can be only either 0 or 1"
+        assert list(np.unique(reply_series)) == [0, 1], "Any value can be " \
+                                                        "only either 0 or 1"
         self.reward_vector1 = reply_series.copy()
         self.reward_vector0 = (reply_series - 1) * (-1)
 
@@ -120,6 +131,8 @@ class SmartStudent(Student):
         self.alpha = alpha
         self.beta = beta
         self.answers = []
+        self.reward_vector = []
+        self.cumulative_reward_vector = []
         super().__init__()
 
     def softmax(self, beta=1):
@@ -178,17 +191,55 @@ class SmartStudent(Student):
             # self.answer = self.trial(p0)
             # self.answers.append(self.answer)
             reward = self.assess(teacher_vector, teacher_vector1, i)
+            self.reward_vector.append(reward)
+            if not self.cumulative_reward_vector:
+                self.cumulative_reward_vector.append(reward)
+            else:
+                self.cumulative_reward_vector\
+                    .append(max(self.cumulative_reward_vector) + reward)
             self.v0 = self.reward(self.v0, reward)
             # pbar.update(10)
-        
-        n_trial = np.arange(0, teacher_vector.size, 1)
-        plt.scatter(n_trial, (teacher_vector / 1), label="Correct", marker="s", alpha=0.5)
+
+        # Answers per time step plot
+        answers_plot = plt.figure(0)
+        n_trial = np.arange(0, teacher_vector1.size, 1)
+        plt.scatter(n_trial, teacher_vector1, label="Correct", marker="s",
+                    alpha=0.5)
         plt.scatter(n_trial, self.answers, label="Student", marker=".")
+        plt.title("Answers")
         plt.xlabel("Time")
         plt.ylabel("Reply")
         plt.yticks((0, 1))
         plt.legend()
-        plt.show()
+        answers_plot.show()
+
+        # Success per time step plot
+        success_plot = plt.figure(1)
+        plt.scatter(n_trial, self.reward_vector)
+        plt.plot(n_trial, self.reward_vector, "--")
+        plt.title("Success")
+        plt.xlabel("Time")
+        plt.ylabel("Reply")
+        plt.yticks((0, 1))
+        success_plot.show()
+
+        # Cumulative success per time step plot
+        cumulative_plot = plt.figure(2)
+        plt.plot(n_trial, self.cumulative_reward_vector)
+        plt.title("Cumulative success")
+        plt.xlabel("Time")
+        plt.ylabel("Cumulative correct answers")
+        cumulative_plot.show()
+
+        # Total accuracy plot
+        accuracy_plot = plt.figure(3)
+        labels = 'Success', 'Failure'
+        sizes = [sum(self.reward_vector) / len(self.reward_vector),
+                 1 - sum(self.reward_vector) / len(self.reward_vector)]
+        plt.pie(sizes, labels=labels, autopct='%1.1f%%',
+                shadow=True, startangle=90)
+        plt.title("Total accuracy")
+        accuracy_plot.show()
 
 
 if __name__ == "__main__":
