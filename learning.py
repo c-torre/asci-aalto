@@ -47,7 +47,7 @@ class Main:
 
             print("epochs:", epoch)
 
-        print("finished training") ######ddfs#
+        print("finished training")
         print(student.memory)
 
 
